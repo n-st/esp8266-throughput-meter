@@ -79,9 +79,14 @@ unsigned long calculateThroughput(
         const unsigned long previousTimestampMillis) {
 
     unsigned long throughput = ULONG_MAX;
+    unsigned long deltaMillis = currentTimestampMillis - previousTimestampMillis;
+    Serial.print("Throughput over ");
+    Serial.print(deltaMillis);
+    Serial.print(" ms: ");
     if (*previousBytecount != 0) {
-        throughput = (currentBytecount - *previousBytecount);
+        throughput = 1000 * (currentBytecount - *previousBytecount) + (deltaMillis/2) / deltaMillis;
     }
+    Serial.println(throughput);
 
     *previousBytecount = currentBytecount;
 
@@ -199,12 +204,13 @@ void loop() {
     unsigned long tpTX4;
     unsigned long tpTX6;
     Serial.print("Getting byte counters... ");
+    unsigned long currentTimestampMillis = millis();
     if (client.connect(THROUGHPUT_INFO_HOST, THROUGHPUT_INFO_CURVAL_PORT)) {
-        Serial.println("OK");
         unsigned long long currentRXBytecount4 = strToULL(client.readStringUntil('\n'));
         unsigned long long currentTXBytecount4 = strToULL(client.readStringUntil('\n'));
         unsigned long long currentRXBytecount6 = strToULL(client.readStringUntil('\n'));
         unsigned long long currentTXBytecount6 = strToULL(client.readStringUntil('\n'));
+        Serial.println("OK");
         client.stop();
         tpRX4 = calculateThroughput(currentRXBytecount4, &previousRXBytecount4, currentTimestampMillis, previousTimestampMillis);
         tpRX6 = calculateThroughput(currentRXBytecount6, &previousRXBytecount6, currentTimestampMillis, previousTimestampMillis);
