@@ -109,31 +109,47 @@ void formatThroughputStr(long throughput, char *buffer) {
 }
 
 void setup() {
-  Serial.begin(115200);
-  
-  u8g2.begin();
+    Serial.begin(115200);
+    Serial.println();
+    Serial.println();
+    Serial.println("Initialising...");
 
-  // We start by connecting to a WiFi network
-  WiFi.mode(WIFI_STA);
-  WiFiMulti.addAP(ssid, password);
+    u8g2.begin();
+    u8g2.setFont(u8g2_font_finderskeepers_tr);
+    u8g2.clearBuffer();
 
-  client.setTimeout(CONNECT_TIMEOUT_MS);
+    u8g2.setCursor(0, 7);
+    u8g2.print("Initialising...");
+    u8g2.sendBuffer();
 
-  Serial.println();
-  Serial.println();
-  Serial.print("Wait for WiFi... ");
+    WiFi.mode(WIFI_STA);
+    WiFiMulti.addAP(ssid, password);
 
-  while (WiFiMulti.run() != WL_CONNECTED) {
-    Serial.print(".");
-    delay(500);
-  }
+    client.setTimeout(CONNECT_TIMEOUT_MS);
 
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
+    Serial.println();
+    Serial.println();
+    Serial.print("Waiting for WiFi.");
+    u8g2.setCursor(0, 15);
+    u8g2.print("Waiting for WiFi...");
+    u8g2.sendBuffer();
 
-  delay(500);
+    while (WiFiMulti.run() != WL_CONNECTED) {
+        Serial.print(".");
+        delay(500);
+    }
+
+    Serial.println("");
+    Serial.println("WiFi connected");
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
+    u8g2.setCursor(0, 23);
+    u8g2.print("IP address:");
+    u8g2.setCursor(0, 31);
+    u8g2.print(WiFi.localIP());
+    u8g2.sendBuffer();
+
+    delay(1000);
 }
 
 unsigned long long previousRXBytecount4 = 0;
