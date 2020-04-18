@@ -20,6 +20,11 @@
 #define THROUGHPUT_INFO_MAXVAL_PORT 17460
 #define THROUGHPUT_INFO_CURVAL_PORT 17461
 
+#define DISPLAY_WIDTH 128
+#define DISPLAY_HEIGHT 32
+#define FONT_HEIGHT 7
+#define FONT_WIDTH 5
+
 #define ARROW_DOWN 'L'
 #define ARROW_UP 'O'
 
@@ -230,6 +235,22 @@ void loop() {
     u8g2.setCursor(128-w, 31);
     u8g2.print(s);
 
+    if (!connectivity4) {
+        u8g2.drawBox(0, 1+4+4, FONT_WIDTH+2, 15);
+        u8g2.setDrawColor(0);
+    }
+    u8g2.setCursor(1, 1+4+4+4+FONT_HEIGHT);
+    u8g2.print('4');
+    u8g2.setDrawColor(1);
+
+    if (!connectivity6) {
+        u8g2.drawBox(DISPLAY_WIDTH-(FONT_WIDTH+2), 1+4+4, FONT_WIDTH+2, 15);
+        u8g2.setDrawColor(0);
+    }
+    u8g2.setCursor(DISPLAY_WIDTH-1-FONT_WIDTH, 1+4+4+4+FONT_HEIGHT);
+    u8g2.print('6');
+    u8g2.setDrawColor(1);
+
     /*
     u8g2.setCursor(0, 23);
     u8g2.print("v 987.654k ");
@@ -246,7 +267,7 @@ void loop() {
     u8g2.print(" 230 654k 6");
     */
 
-    u8g2.sendBuffer();          // transfer internal memory to the display
+    u8g2.sendBuffer();
 
     Serial.println("wait 1 sec...");
     delay(1000);
