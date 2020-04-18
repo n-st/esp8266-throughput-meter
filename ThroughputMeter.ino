@@ -13,6 +13,7 @@
 #endif
 
 #define CONNECT_TIMEOUT_MS 300
+#define CYCLE_INTERVAL 1000
 #define CONNECTION_TEST_INTERVAL_MS 5000
 #define CONNECTION_TEST_HOST_V4 "1.1.0.1"
 #define CONNECTION_TEST_HOST_V6 "2606:4700:4700::1001"
@@ -269,6 +270,13 @@ void loop() {
 
     u8g2.sendBuffer();
 
-    Serial.println("wait 1 sec...");
-    delay(1000);
+    /* Calculate waiting time until next cycle */
+    int waitMillis = (currentTimestampMillis + CYCLE_INTERVAL) - millis();
+    if (waitMillis < 0) {
+        waitMillis = 0;
+    }
+    Serial.print("Waiting ");
+    Serial.print(waitMillis);
+    Serial.println(" ms until next cycle...");
+    delay(waitMillis);
 }
