@@ -25,9 +25,13 @@
 #define DISPLAY_HEIGHT 32
 #define FONT_HEIGHT 7
 #define FONT_WIDTH 5
+#define PADDED_BAR_HEIGHT 4
+#define LINE_SPACING 1
 
 #define ARROW_DOWN 'L'
 #define ARROW_UP 'O'
+#define ARROW_FONT_HEIGHT 8
+#define ARROW_FONT_WIDTH 6
 
 const char* ssid     = STASSID;
 const char* password = STAPSK;
@@ -105,13 +109,19 @@ void formatThroughputStr(long throughput, char *buffer) {
     } else if (throughput <= 999999999) {
         // 1000'000-999999'999 - ___.___k
         throughput = (throughput+1000/2)/1000;
-        sprintf(buffer, "%lu'%03luk", throughput/1000, throughput%1000);
+        sprintf(buffer, "%lu %03luk", throughput/1000, throughput%1000);
 
     } else {
         // 1000000-... - _____M
         throughput = (throughput+1000/2)/1000;
         sprintf(buffer, "%luM", throughput/1000);
     }
+}
+
+void displayPrintRightAligned(char *s, unsigned int rightX, unsigned int topY) {
+    int width = u8g2.getStrWidth(s);
+    u8g2.setCursor(rightX-width, topY+FONT_HEIGHT);
+    u8g2.print(s);
 }
 
 void setup() {
@@ -211,30 +221,29 @@ void loop() {
     previousTimestampMillis = currentTimestampMillis;
 
     u8g2.clearBuffer();
-    u8g2.setFont(u8g2_font_finderskeepers_tr); // 27 chars
+
+    u8g2.setFont(u8g2_font_open_iconic_arrow_1x_t);
+    u8g2.setCursor(DISPLAY_WIDTH/2-ARROW_FONT_WIDTH/2, 1+2*PADDED_BAR_HEIGHT+ARROW_FONT_HEIGHT);
+    u8g2.print(ARROW_DOWN);
+    u8g2.setCursor(DISPLAY_WIDTH/2-ARROW_FONT_WIDTH/2, 1+2*PADDED_BAR_HEIGHT+2*ARROW_FONT_HEIGHT+LINE_SPACING-2);
+    u8g2.print(ARROW_UP);
+
+    u8g2.setFont(u8g2_font_finderskeepers_tr);
 
     char s[30];
     int w;
 
     formatThroughputStr(tpRX4, s);
-    w = u8g2.getStrWidth(s);
-    u8g2.setCursor(128-w, 7);
-    u8g2.print(s);
+    displayPrintRightAligned(s, DISPLAY_WIDTH/2-ARROW_FONT_WIDTH/2-3, 1+2*PADDED_BAR_HEIGHT);
 
     formatThroughputStr(tpTX4, s);
-    w = u8g2.getStrWidth(s);
-    u8g2.setCursor(128-w, 15);
-    u8g2.print(s);
+    displayPrintRightAligned(s, DISPLAY_WIDTH/2-ARROW_FONT_WIDTH/2-3, 1+2*PADDED_BAR_HEIGHT+FONT_HEIGHT+LINE_SPACING);
 
     formatThroughputStr(tpRX6, s);
-    w = u8g2.getStrWidth(s);
-    u8g2.setCursor(128-w, 23);
-    u8g2.print(s);
+    displayPrintRightAligned(s, DISPLAY_WIDTH-(FONT_WIDTH+2)-3, 1+2*PADDED_BAR_HEIGHT);
 
     formatThroughputStr(tpTX6, s);
-    w = u8g2.getStrWidth(s);
-    u8g2.setCursor(128-w, 31);
-    u8g2.print(s);
+    displayPrintRightAligned(s, DISPLAY_WIDTH-(FONT_WIDTH+2)-3, 1+2*PADDED_BAR_HEIGHT+FONT_HEIGHT+LINE_SPACING);
 
     if (!connectivity4) {
         u8g2.drawBox(0, 1+4+4, FONT_WIDTH+2, 15);
@@ -251,22 +260,6 @@ void loop() {
     u8g2.setCursor(DISPLAY_WIDTH-1-FONT_WIDTH, 1+4+4+4+FONT_HEIGHT);
     u8g2.print('6');
     u8g2.setDrawColor(1);
-
-    /*
-    u8g2.setCursor(0, 23);
-    u8g2.print("v 987.654k ");
-    u8g2.setFont(u8g2_font_open_iconic_arrow_1x_t);
-    u8g2.print(ARROW_DOWN);
-    u8g2.setFont(u8g2_font_finderskeepers_tr);
-    u8g2.print(" 230.654k v");
-
-    u8g2.setCursor(0, 31);
-    u8g2.print("4 900 723k ");
-    u8g2.setFont(u8g2_font_open_iconic_arrow_1x_t);
-    u8g2.print(ARROW_UP);
-    u8g2.setFont(u8g2_font_finderskeepers_tr);
-    u8g2.print(" 230 654k 6");
-    */
 
     u8g2.sendBuffer();
 
