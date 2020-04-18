@@ -148,8 +148,6 @@ void setup() {
 
     client.setTimeout(CONNECT_TIMEOUT_MS);
 
-    Serial.println();
-    Serial.println();
     Serial.print("Waiting for WiFi.");
     u8g2.setCursor(0, 15);
     u8g2.print("Waiting for WiFi...");
@@ -183,26 +181,13 @@ bool connectivity4 = false;
 bool connectivity6 = false;
 
 void loop() {
-    unsigned long currentTimestampMillis = millis();
-
-    if (currentTimestampMillis >= previousConnCheckMillis + CONNECTION_TEST_INTERVAL_MS) {
-        Serial.println("Checking connectivity...");
-
-        connectivity4 = checkConnectivity4();
-        Serial.print("IPv4: ");
-        Serial.println(connectivity4 ? "OK" : "FAIL");
-
-        connectivity6 = checkConnectivity6();
-        Serial.print("IPv6: ");
-        Serial.println(connectivity4 ? "OK" : "FAIL");
-
-        previousConnCheckMillis = currentTimestampMillis;
-    }
+    /* Get byte counters, compute throughput */
 
     unsigned long tpRX4;
     unsigned long tpRX6;
     unsigned long tpTX4;
     unsigned long tpTX6;
+
     Serial.print("Getting byte counters... ");
     unsigned long currentTimestampMillis = millis();
     if (client.connect(THROUGHPUT_INFO_HOST, THROUGHPUT_INFO_CURVAL_PORT)) {
@@ -223,9 +208,25 @@ void loop() {
         tpTX4 = ULONG_MAX;
         tpTX6 = ULONG_MAX;
     }
-
     previousTimestampMillis = currentTimestampMillis;
 
+    /* Check internet connectivity */
+    currentTimestampMillis = millis();
+    if (currentTimestampMillis >= previousConnCheckMillis + CONNECTION_TEST_INTERVAL_MS) {
+        Serial.println("Checking connectivity...");
+
+        connectivity4 = checkConnectivity4();
+        Serial.print("IPv4: ");
+        Serial.println(connectivity4 ? "OK" : "FAIL");
+
+        connectivity6 = checkConnectivity6();
+        Serial.print("IPv6: ");
+        Serial.println(connectivity6 ? "OK" : "FAIL");
+
+        previousConnCheckMillis = currentTimestampMillis;
+    }
+
+    /* Fill display */
     u8g2.clearBuffer();
 
     u8g2.setFont(u8g2_font_open_iconic_arrow_1x_t);
