@@ -370,6 +370,17 @@ void loop() {
         previousConnCheckMillis = currentTimestampMillis;
     }
 
+    /* Debug output: Obtained max values */
+    Serial.print("Max throughput (B/s RX4/TX4/RX6/TX6): ");
+    Serial.print(tpMaxRX4);
+    Serial.print('/');
+    Serial.print(tpMaxTX4);
+    Serial.print('/');
+    Serial.print(tpMaxRX6);
+    Serial.print('/');
+    Serial.print(tpMaxTX6);
+    Serial.println();
+
     /* Calculate waiting time until next cycle */
     int waitMillis = TIMEDELTA(millis(), currentTimestampMillis + CYCLE_INTERVAL);
     if (waitMillis < 0) {
