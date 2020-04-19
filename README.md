@@ -53,3 +53,41 @@ Notes
   Using an anycasted target gives the best chance that it will be online; using
   a HTTP-enabled one allows us to resort to TCP requests rather than
   implementing ICMP on the ESP8266.
+
+On-wire "protocol"
+------------------
+
+The ESP8266 connects to two different (configurable) ports on the info host.  
+It will not send any data to the info host.  
+It expects the following data formats, and will close the connection after it has received them:
+
+### Maximum throughput (default port: 17460)
+
+    IPv4 maximum downstream (bytes/sec)
+    IPv4 maximum upstream (bytes/sec)
+    IPv6 maximum downstream (bytes/sec)
+    IPv6 maximum upstream (bytes/sec)
+
+Example (1000 Mbit/s down, 50 Mbit/s up):
+
+    $ nc infohost 17460 < /dev/null
+    125000000
+    6250000
+    125000000
+    6250000
+
+### Current byte counters (default port: 17461)
+
+    IPv4 downstream byte count
+    IPv4 upstream byte count
+    IPv6 downstream byte count
+    IPv6 upstream byte count
+
+All counters must be monotonously increasing (i.e. never reset).
+Example:
+
+    $ nc infohost 17461 < /dev/null
+    52752909410
+    7668139684
+    227098523468
+    17179238881
