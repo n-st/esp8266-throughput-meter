@@ -33,7 +33,7 @@ Setup
 3. Adjust maximum bandwidth in `/etc/systemd/system/netnetmaxtp.service`
 4. Enable and start `netnettp.service`
 5. Optionally enable and start `netnetmaxtp.service`
-6. Optionally enable low-precision mode in `ThroughputMeter.ino`
+6. Copy `config.example.h` to `config.h` and modify for your setup.
 7. Program a WiFi Kit 8 or compatible board with `ThroughputMeter.ino`
 
 Notes
