@@ -4,6 +4,8 @@ ESP8266 Network Throughput Meter
 Queries the current network throughput from an "info host" via a raw TCP
 protocol and displays it on a 128x32px display.
 
+![Board showing 75 MB/s downstream on IPv6](board.jpg)
+
 Developed and tested for a "WiFi Kit 8"-style ESP8266 + OLED integrated board.
 
 Setup
