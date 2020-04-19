@@ -3,34 +3,17 @@
 #include <U8g2lib.h>
 #include <time.h>
 
+#include "config.h"
+
 #ifdef U8X8_HAVE_HW_I2C
 #include <Wire.h>
 #endif
-
-#ifndef STASSID
-#define STASSID "MyAP"
-#define STAPSK  "passw0rd"
-#endif
-
-// only show most significant digit of throughput numbers,
-// blank out the rest with _
-//#define LOW_PRECISION_MODE 1
 
 #define TIMEDELTA(old__, new__) ( \
         ((new__) < (old__)) \
         ? (ULONG_MAX - (old__) + (new__)) \
         : ((new__) - (old__)) \
         )
-
-
-#define CONNECT_TIMEOUT_MS 200
-#define CYCLE_INTERVAL 500
-#define CONNECTION_TEST_INTERVAL_MS 10000
-#define CONNECTION_TEST_HOST_V4 "1.0.0.1"
-#define CONNECTION_TEST_HOST_V6 "2606:4700:4700::1001"
-#define THROUGHPUT_INFO_HOST "2001:db8::1"
-#define THROUGHPUT_INFO_MAXVAL_PORT 17460
-#define THROUGHPUT_INFO_CURVAL_PORT 17461
 
 #define DISPLAY_WIDTH 128
 #define DISPLAY_HEIGHT 32
@@ -43,9 +26,6 @@
 #define ARROW_UP 'O'
 #define ARROW_FONT_HEIGHT 8
 #define ARROW_FONT_WIDTH 6
-
-const char* ssid     = STASSID;
-const char* password = STAPSK;
 
 unsigned long long previousRXBytecount4 = 0;
 unsigned long long previousRXBytecount6 = 0;
@@ -199,7 +179,7 @@ void setup() {
     u8g2.sendBuffer();
 
     WiFi.mode(WIFI_STA);
-    WiFiMulti.addAP(ssid, password);
+    WiFiMulti.addAP(WIFI_SSID, WIFI_PSK);
 
     client.setTimeout(CONNECT_TIMEOUT_MS);
 
