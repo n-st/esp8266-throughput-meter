@@ -12,6 +12,10 @@
 #define STAPSK  "passw0rd"
 #endif
 
+// only show most significant digit of throughput numbers,
+// blank out the rest with _
+#define LOW_PRECISION_MODE 1
+
 #define TIMEDELTA(old__, new__) ( \
         ((new__) < (old__)) \
         ? (ULONG_MAX - (old__) + (new__)) \
@@ -149,11 +153,23 @@ void formatThroughputStr(long throughput, char *buffer) {
         // 500-999'999 - ___k
         throughput = (throughput+1000/2)/1000;
         sprintf(buffer, "%luk", throughput);
+        #ifdef LOW_PRECISION_MODE
+        for (int i = 1; i < strlen(buffer)-1; ++i) {
+            buffer[i] = '_';
+        }
+        #endif
 
     } else if (throughput <= 999999999) {
         // 1000'000-999999'999 - ___.___k
         throughput = (throughput+1000/2)/1000;
+        #ifdef LOW_PRECISION_MODE
+        sprintf(buffer, "%lu ___k", throughput/1000);
+        for (int i = 1; i < strlen(buffer)-5; ++i) {
+            buffer[i] = '_';
+        }
+        #else
         sprintf(buffer, "%lu %03luk", throughput/1000, throughput%1000);
+        #endif
 
     } else {
         // 1000000-... - _____M
