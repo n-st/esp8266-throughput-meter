@@ -102,6 +102,22 @@ unsigned long calculateThroughput(
     return throughput;
 }
 
+unsigned int calculateThroughputBarWidth(unsigned long tp, unsigned long tpMax) {
+    if (tp == ULONG_MAX || tp == 0) {
+        // unknown || 0
+        return 0;
+
+    } else {
+        unsigned int bar_width;
+        bar_width = ((unsigned long long) tp * DISPLAY_WIDTH + tpMax/2) / tpMax;
+        if (bar_width == 0) {
+            // throughput is not 0, so bar should at least be visible
+            bar_width = 1;
+        }
+        return bar_width;
+    }
+}
+
 void formatThroughputStr(long throughput, char *buffer) {
     if (throughput == ULONG_MAX) {
         // unknown -> ---
@@ -232,37 +248,30 @@ void loop() {
 
     char s[30];
     int w;
+    unsigned int bar_width;
 
     unsigned long long tpMaxRX = 1000000000/8;
     unsigned long long tpMaxTX = 50000000/8;
 
     formatThroughputStr(tpRX4, s);
     displayPrintRightAligned(s, DISPLAY_WIDTH/2-ARROW_FONT_WIDTH/2-3, 1+2*PADDED_BAR_HEIGHT);
-    if (tpRX4 != ULONG_MAX) {
-        unsigned int bar_width = ((unsigned long long) tpRX4 * DISPLAY_WIDTH + tpMaxRX/2) / tpMaxRX;
-        u8g2.drawBox(0, 1, bar_width, PADDED_BAR_HEIGHT-1);
-    }
+    bar_width = calculateThroughputBarWidth(tpRX4, tpMaxRX);
+    u8g2.drawBox(0, 1, bar_width, PADDED_BAR_HEIGHT-1);
 
     formatThroughputStr(tpTX4, s);
     displayPrintRightAligned(s, DISPLAY_WIDTH/2-ARROW_FONT_WIDTH/2-3, 1+2*PADDED_BAR_HEIGHT+FONT_HEIGHT+LINE_SPACING);
-    if (tpTX4 != ULONG_MAX) {
-        unsigned int bar_width = ((unsigned long long) tpTX4 * DISPLAY_WIDTH + tpMaxTX/2) / tpMaxTX;
-        u8g2.drawBox(0, DISPLAY_HEIGHT-2*PADDED_BAR_HEIGHT+1, bar_width, PADDED_BAR_HEIGHT-1);
-    }
+    bar_width = calculateThroughputBarWidth(tpTX4, tpMaxTX);
+    u8g2.drawBox(0, DISPLAY_HEIGHT-2*PADDED_BAR_HEIGHT+1, bar_width, PADDED_BAR_HEIGHT-1);
 
     formatThroughputStr(tpRX6, s);
     displayPrintRightAligned(s, DISPLAY_WIDTH-(FONT_WIDTH+2)-3, 1+2*PADDED_BAR_HEIGHT);
-    if (tpRX6 != ULONG_MAX) {
-        unsigned int bar_width = ((unsigned long long) tpRX6 * DISPLAY_WIDTH + tpMaxRX/2) / tpMaxRX;
-        u8g2.drawBox(DISPLAY_WIDTH-bar_width, 1+PADDED_BAR_HEIGHT, bar_width, PADDED_BAR_HEIGHT-1);
-    }
+    bar_width = calculateThroughputBarWidth(tpRX6, tpMaxRX);
+    u8g2.drawBox(DISPLAY_WIDTH-bar_width, 1+PADDED_BAR_HEIGHT, bar_width, PADDED_BAR_HEIGHT-1);
 
     formatThroughputStr(tpTX6, s);
     displayPrintRightAligned(s, DISPLAY_WIDTH-(FONT_WIDTH+2)-3, 1+2*PADDED_BAR_HEIGHT+FONT_HEIGHT+LINE_SPACING);
-    if (tpTX6 != ULONG_MAX) {
-        unsigned int bar_width = ((unsigned long long) tpTX6 * DISPLAY_WIDTH + tpMaxTX/2) / tpMaxTX;
-        u8g2.drawBox(DISPLAY_WIDTH-bar_width, DISPLAY_HEIGHT-PADDED_BAR_HEIGHT+1, bar_width, PADDED_BAR_HEIGHT-1);
-    }
+    bar_width = calculateThroughputBarWidth(tpTX6, tpMaxTX);
+    u8g2.drawBox(DISPLAY_WIDTH-bar_width, DISPLAY_HEIGHT-PADDED_BAR_HEIGHT+1, bar_width, PADDED_BAR_HEIGHT-1);
 
     if (!connectivity4) {
         u8g2.drawBox(0, 1+4+4, FONT_WIDTH+2, 15);
