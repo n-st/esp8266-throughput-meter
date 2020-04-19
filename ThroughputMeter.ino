@@ -204,6 +204,8 @@ unsigned long previousTimestampMillis = 0;
 unsigned long previousConnCheckMillis = 0;
 bool connectivity4 = false;
 bool connectivity6 = false;
+unsigned long tpMaxRX = 0;
+unsigned long tpMaxTX = 0;
 
 void loop() {
     /* Get byte counters, compute throughput */
@@ -226,6 +228,14 @@ void loop() {
         tpTX4 = calculateThroughput(currentTXBytecount4, &previousTXBytecount4, currentTimestampMillis, previousTimestampMillis);
         tpRX6 = calculateThroughput(currentRXBytecount6, &previousRXBytecount6, currentTimestampMillis, previousTimestampMillis);
         tpTX6 = calculateThroughput(currentTXBytecount6, &previousTXBytecount6, currentTimestampMillis, previousTimestampMillis);
+        unsigned long tpSumRX = tpRX4 + tpRX6;
+        if (tpRX4 != ULONG_MAX && tpRX6 != ULONG_MAX && tpSumRX > tpMaxRX) {
+            tpMaxRX = tpSumRX;
+        }
+        unsigned long tpSumTX = tpTX4 + tpTX6;
+        if (tpTX4 != ULONG_MAX && tpTX6 != ULONG_MAX && tpSumTX > tpMaxTX) {
+            tpMaxTX = tpSumTX;
+        }
     } else {
         Serial.println("FAIL");
         tpRX4 = ULONG_MAX;
@@ -249,9 +259,6 @@ void loop() {
     char s[30];
     int w;
     unsigned int bar_width;
-
-    unsigned long long tpMaxRX = 1000000000/8;
-    unsigned long long tpMaxTX = 50000000/8;
 
     formatThroughputStr(tpRX4, s);
     displayPrintRightAligned(s, DISPLAY_WIDTH/2-ARROW_FONT_WIDTH/2-3, 1+2*PADDED_BAR_HEIGHT);
