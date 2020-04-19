@@ -6,6 +6,34 @@ protocol and displays it on a 128x32px display.
 
 Developed and tested for a "WiFi Kit 8"-style ESP8266 + OLED integrated board.
 
+Setup
+-----
+
+1. Add iptables rules for counting bytes (the netnettp script counts bytes for
+   the first rule in `COUNTING_DOWNSTREAM` and `COUNTING_UPSTREAM`):
+      iptables -N COUNTING_DOWNSTREAM
+      iptables -N COUNTING_UPSTREAM
+      iptables -I INPUT -i internet0 -j COUNTING_DOWNSTREAM
+      iptables -I FORWARD -i internet0 -j COUNTING_DOWNSTREAM
+      iptables -I OUTPUT -o internet0 -j COUNTING_UPSTREAM
+      iptables -I FORWARD -o internet0 -j COUNTING_UPSTREAM
+      iptables -I COUNTING_DOWNSTREAM -j RETURN
+      iptables -I COUNTING_UPSTREAM -j RETURN
+      ip6tables -N COUNTING_DOWNSTREAM
+      ip6tables -N COUNTING_UPSTREAM
+      ip6tables -I INPUT -i internet0 -j COUNTING_DOWNSTREAM
+      ip6tables -I FORWARD -i internet0 -j COUNTING_DOWNSTREAM
+      ip6tables -I OUTPUT -o internet0 -j COUNTING_UPSTREAM
+      ip6tables -I FORWARD -o internet0 -j COUNTING_UPSTREAM
+      ip6tables -I COUNTING_DOWNSTREAM -j RETURN
+      ip6tables -I COUNTING_UPSTREAM -j RETURN
+2. Copy `.service` files to `/etc/systemd/system`
+3. Adjust maximum bandwidth in `/etc/systemd/system/netnetmaxtp.service`
+4. Enable and start `netnettp.service`
+5. Optionally enable and start `netnetmaxtp.service`
+6. Optionally enable low-precision mode in `ThroughputMeter.ino`
+7. Program a WiFi Kit 8 or compatible board with `ThroughputMeter.ino`
+
 Notes
 -----
 
