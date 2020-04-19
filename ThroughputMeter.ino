@@ -204,8 +204,10 @@ unsigned long previousTimestampMillis = 0;
 unsigned long previousConnCheckMillis = 0;
 bool connectivity4 = false;
 bool connectivity6 = false;
-unsigned long tpMaxRX = 0;
-unsigned long tpMaxTX = 0;
+unsigned long tpMaxRX4 = 0;
+unsigned long tpMaxRX6 = 0;
+unsigned long tpMaxTX4 = 0;
+unsigned long tpMaxTX6 = 0;
 
 void loop() {
     /* Get byte counters, compute throughput */
@@ -230,11 +232,13 @@ void loop() {
         tpTX6 = calculateThroughput(currentTXBytecount6, &previousTXBytecount6, currentTimestampMillis, previousTimestampMillis);
         unsigned long tpSumRX = tpRX4 + tpRX6;
         if (tpRX4 != ULONG_MAX && tpRX6 != ULONG_MAX && tpSumRX > tpMaxRX) {
-            tpMaxRX = tpSumRX;
+            tpMaxRX4 = tpSumRX;
+            tpMaxRX6 = tpSumRX;
         }
         unsigned long tpSumTX = tpTX4 + tpTX6;
         if (tpTX4 != ULONG_MAX && tpTX6 != ULONG_MAX && tpSumTX > tpMaxTX) {
-            tpMaxTX = tpSumTX;
+            tpMaxTX4 = tpSumTX;
+            tpMaxTX6 = tpSumTX;
         }
     } else {
         Serial.println("FAIL");
@@ -262,22 +266,22 @@ void loop() {
 
     formatThroughputStr(tpRX4, s);
     displayPrintRightAligned(s, DISPLAY_WIDTH/2-ARROW_FONT_WIDTH/2-3, 1+2*PADDED_BAR_HEIGHT);
-    bar_width = calculateThroughputBarWidth(tpRX4, tpMaxRX);
+    bar_width = calculateThroughputBarWidth(tpRX4, tpMaxRX4);
     u8g2.drawBox(0, 1, bar_width, PADDED_BAR_HEIGHT-1);
 
     formatThroughputStr(tpTX4, s);
     displayPrintRightAligned(s, DISPLAY_WIDTH/2-ARROW_FONT_WIDTH/2-3, 1+2*PADDED_BAR_HEIGHT+FONT_HEIGHT+LINE_SPACING);
-    bar_width = calculateThroughputBarWidth(tpTX4, tpMaxTX);
+    bar_width = calculateThroughputBarWidth(tpTX4, tpMaxTX4);
     u8g2.drawBox(0, DISPLAY_HEIGHT-2*PADDED_BAR_HEIGHT+1, bar_width, PADDED_BAR_HEIGHT-1);
 
     formatThroughputStr(tpRX6, s);
     displayPrintRightAligned(s, DISPLAY_WIDTH-(FONT_WIDTH+2)-3, 1+2*PADDED_BAR_HEIGHT);
-    bar_width = calculateThroughputBarWidth(tpRX6, tpMaxRX);
+    bar_width = calculateThroughputBarWidth(tpRX6, tpMaxRX6);
     u8g2.drawBox(DISPLAY_WIDTH-bar_width, 1+PADDED_BAR_HEIGHT, bar_width, PADDED_BAR_HEIGHT-1);
 
     formatThroughputStr(tpTX6, s);
     displayPrintRightAligned(s, DISPLAY_WIDTH-(FONT_WIDTH+2)-3, 1+2*PADDED_BAR_HEIGHT+FONT_HEIGHT+LINE_SPACING);
-    bar_width = calculateThroughputBarWidth(tpTX6, tpMaxTX);
+    bar_width = calculateThroughputBarWidth(tpTX6, tpMaxTX6);
     u8g2.drawBox(DISPLAY_WIDTH-bar_width, DISPLAY_HEIGHT-PADDED_BAR_HEIGHT+1, bar_width, PADDED_BAR_HEIGHT-1);
 
     if (!connectivity4) {
