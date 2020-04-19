@@ -233,17 +233,36 @@ void loop() {
     char s[30];
     int w;
 
+    unsigned long long tpMaxRX = 1000000000/8;
+    unsigned long long tpMaxTX = 50000000/8;
+
     formatThroughputStr(tpRX4, s);
     displayPrintRightAligned(s, DISPLAY_WIDTH/2-ARROW_FONT_WIDTH/2-3, 1+2*PADDED_BAR_HEIGHT);
+    if (tpRX4 != ULONG_MAX) {
+        unsigned int bar_width = ((unsigned long long) tpRX4 * DISPLAY_WIDTH + tpMaxRX/2) / tpMaxRX;
+        u8g2.drawBox(0, 1, bar_width, PADDED_BAR_HEIGHT-1);
+    }
 
     formatThroughputStr(tpTX4, s);
     displayPrintRightAligned(s, DISPLAY_WIDTH/2-ARROW_FONT_WIDTH/2-3, 1+2*PADDED_BAR_HEIGHT+FONT_HEIGHT+LINE_SPACING);
+    if (tpTX4 != ULONG_MAX) {
+        unsigned int bar_width = ((unsigned long long) tpTX4 * DISPLAY_WIDTH + tpMaxTX/2) / tpMaxTX;
+        u8g2.drawBox(0, DISPLAY_HEIGHT-2*PADDED_BAR_HEIGHT+1, bar_width, PADDED_BAR_HEIGHT-1);
+    }
 
     formatThroughputStr(tpRX6, s);
     displayPrintRightAligned(s, DISPLAY_WIDTH-(FONT_WIDTH+2)-3, 1+2*PADDED_BAR_HEIGHT);
+    if (tpRX6 != ULONG_MAX) {
+        unsigned int bar_width = ((unsigned long long) tpRX6 * DISPLAY_WIDTH + tpMaxRX/2) / tpMaxRX;
+        u8g2.drawBox(DISPLAY_WIDTH-bar_width, 1+PADDED_BAR_HEIGHT, bar_width, PADDED_BAR_HEIGHT-1);
+    }
 
     formatThroughputStr(tpTX6, s);
     displayPrintRightAligned(s, DISPLAY_WIDTH-(FONT_WIDTH+2)-3, 1+2*PADDED_BAR_HEIGHT+FONT_HEIGHT+LINE_SPACING);
+    if (tpTX6 != ULONG_MAX) {
+        unsigned int bar_width = ((unsigned long long) tpTX6 * DISPLAY_WIDTH + tpMaxTX/2) / tpMaxTX;
+        u8g2.drawBox(DISPLAY_WIDTH-bar_width, DISPLAY_HEIGHT-PADDED_BAR_HEIGHT+1, bar_width, PADDED_BAR_HEIGHT-1);
+    }
 
     if (!connectivity4) {
         u8g2.drawBox(0, 1+4+4, FONT_WIDTH+2, 15);
