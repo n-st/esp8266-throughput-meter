@@ -1,0 +1,10 @@
+[Unit]
+After=network.target
+
+[Service]
+ExecStart=socat tcp6-l:17460,reuseaddr,fork "system:'echo $((1000 * 1000000 / 8)); echo $((50 * 1000000 / 8)); echo $((1000 * 1000000 / 8)); echo $((50 * 1000000 / 8))'"
+Restart=on-failure
+Type=simple
+
+[Install]
+WantedBy=multi-user.target

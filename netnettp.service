@@ -1,0 +1,10 @@
+[Unit]
+After=network.target
+
+[Service]
+ExecStart=socat tcp6-l:17461,reuseaddr,fork "system:'(iptables -vnxL COUNTING_DOWNSTREAM 1; iptables -vnxL COUNTING_UPSTREAM 1; ip6tables -vnxL COUNTING_DOWNSTREAM 1; ip6tables -vnxL COUNTING_UPSTREAM 1) | awk \"{print \\\$2}\"'"
+Restart=on-failure
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
