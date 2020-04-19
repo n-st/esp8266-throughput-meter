@@ -12,6 +12,13 @@
 #define STAPSK  "passw0rd"
 #endif
 
+#define TIMEDELTA(old__, new__) ( \
+        ((new__) < (old__)) \
+        ? (ULONG_MAX - (old__) + (new__)) \
+        : ((new__) - (old__)) \
+        )
+
+
 #define CONNECT_TIMEOUT_MS 200
 #define CYCLE_INTERVAL 500
 #define CONNECTION_TEST_INTERVAL_MS 10000
@@ -79,7 +86,7 @@ unsigned long calculateThroughput(
         const unsigned long previousTimestampMillis) {
 
     unsigned long throughput = ULONG_MAX;
-    unsigned long deltaMillis = currentTimestampMillis - previousTimestampMillis;
+    unsigned long deltaMillis = TIMEDELTA(previousTimestampMillis, currentTimestampMillis);
     Serial.print("Bytes over ");
     Serial.print(deltaMillis);
     Serial.print(" ms: ");
@@ -257,7 +264,7 @@ void loop() {
     u8g2.sendBuffer();
 
     /* Check internet connectivity (to be displayed next cycle) */
-    if (currentTimestampMillis >= previousConnCheckMillis + CONNECTION_TEST_INTERVAL_MS) {
+    if (TIMEDELTA(previousConnCheckMillis, currentTimestampMillis) >= CONNECTION_TEST_INTERVAL_MS) {
         Serial.println("Checking connectivity...");
 
         connectivity4 = checkConnectivity4();
@@ -272,7 +279,7 @@ void loop() {
     }
 
     /* Calculate waiting time until next cycle */
-    int waitMillis = (currentTimestampMillis + CYCLE_INTERVAL) - millis();
+    int waitMillis = TIMEDELTA(millis(), currentTimestampMillis + CYCLE_INTERVAL);
     if (waitMillis < 0) {
         waitMillis = 0;
     }
