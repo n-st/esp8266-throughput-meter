@@ -212,21 +212,6 @@ void loop() {
     }
     previousTimestampMillis = currentTimestampMillis;
 
-    /* Check internet connectivity */
-    if (currentTimestampMillis >= previousConnCheckMillis + CONNECTION_TEST_INTERVAL_MS) {
-        Serial.println("Checking connectivity...");
-
-        connectivity4 = checkConnectivity4();
-        Serial.print("IPv4: ");
-        Serial.println(connectivity4 ? "OK" : "FAIL");
-
-        connectivity6 = checkConnectivity6();
-        Serial.print("IPv6: ");
-        Serial.println(connectivity6 ? "OK" : "FAIL");
-
-        previousConnCheckMillis = currentTimestampMillis;
-    }
-
     /* Fill display */
     u8g2.clearBuffer();
 
@@ -270,6 +255,21 @@ void loop() {
     u8g2.setDrawColor(1);
 
     u8g2.sendBuffer();
+
+    /* Check internet connectivity (to be displayed next cycle) */
+    if (currentTimestampMillis >= previousConnCheckMillis + CONNECTION_TEST_INTERVAL_MS) {
+        Serial.println("Checking connectivity...");
+
+        connectivity4 = checkConnectivity4();
+        Serial.print("IPv4: ");
+        Serial.println(connectivity4 ? "OK" : "FAIL");
+
+        connectivity6 = checkConnectivity6();
+        Serial.print("IPv6: ");
+        Serial.println(connectivity6 ? "OK" : "FAIL");
+
+        previousConnCheckMillis = currentTimestampMillis;
+    }
 
     /* Calculate waiting time until next cycle */
     int waitMillis = (currentTimestampMillis + CYCLE_INTERVAL) - millis();
