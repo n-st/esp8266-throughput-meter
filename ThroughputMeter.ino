@@ -43,6 +43,20 @@
 const char* ssid     = STASSID;
 const char* password = STAPSK;
 
+unsigned long long previousRXBytecount4 = 0;
+unsigned long long previousRXBytecount6 = 0;
+unsigned long long previousTXBytecount4 = 0;
+unsigned long long previousTXBytecount6 = 0;
+unsigned long previousTimestampMillis = 0;
+unsigned long previousConnCheckMillis = 0;
+bool connectivity4 = false;
+bool connectivity6 = false;
+bool tpMaxGiven = false;
+unsigned long tpMaxRX4 = 0;
+unsigned long tpMaxRX6 = 0;
+unsigned long tpMaxTX4 = 0;
+unsigned long tpMaxTX6 = 0;
+
 ESP8266WiFiMulti WiFiMulti;
 WiFiClient client;
 U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ 16, /* clock=*/ 5, /* data=*/ 4);
@@ -188,26 +202,49 @@ void setup() {
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
     u8g2.setCursor(0, 23);
-    u8g2.print("IP address:");
-    u8g2.setCursor(0, 31);
+    u8g2.print("IP: ");
     u8g2.print(WiFi.localIP());
+    u8g2.sendBuffer();
+
+    Serial.print("Waiting for info host.");
+    while (!client.connect(THROUGHPUT_INFO_HOST, THROUGHPUT_INFO_CURVAL_PORT)) {
+        Serial.print(".");
+        delay(500);
+    }
+    Serial.println("");
+
+    u8g2.setCursor(0, 31);
+    if (client.connect(THROUGHPUT_INFO_HOST, THROUGHPUT_INFO_MAXVAL_PORT)) {
+        tpMaxRX4 = strToULL(client.readStringUntil('\n'));
+        tpMaxTX4 = strToULL(client.readStringUntil('\n'));
+        tpMaxRX6 = strToULL(client.readStringUntil('\n'));
+        tpMaxTX6 = strToULL(client.readStringUntil('\n'));
+        tpMaxGiven = true;
+        u8g2.print("Max: ");
+        u8g2.print(tpMaxRX4/1000000);
+        u8g2.print('/');
+        u8g2.print(tpMaxTX4/1000000);
+        u8g2.print('/');
+        u8g2.print(tpMaxRX6/1000000);
+        u8g2.print('/');
+        u8g2.print(tpMaxTX6/1000000);
+        Serial.print("Max throughput (MB/s RX4/TX4/RX6/TX6): ");
+        Serial.print(tpMaxRX4/1000000);
+        Serial.print('/');
+        Serial.print(tpMaxTX4/1000000);
+        Serial.print('/');
+        Serial.print(tpMaxRX6/1000000);
+        Serial.print('/');
+        Serial.print(tpMaxTX6/1000000);
+        Serial.println();
+    } else {
+        u8g2.print("Max tp not set");
+        Serial.println("Max throughput not set");
+    }
     u8g2.sendBuffer();
 
     delay(1000);
 }
-
-unsigned long long previousRXBytecount4 = 0;
-unsigned long long previousRXBytecount6 = 0;
-unsigned long long previousTXBytecount4 = 0;
-unsigned long long previousTXBytecount6 = 0;
-unsigned long previousTimestampMillis = 0;
-unsigned long previousConnCheckMillis = 0;
-bool connectivity4 = false;
-bool connectivity6 = false;
-unsigned long tpMaxRX4 = 0;
-unsigned long tpMaxRX6 = 0;
-unsigned long tpMaxTX4 = 0;
-unsigned long tpMaxTX6 = 0;
 
 void loop() {
     /* Get byte counters, compute throughput */
@@ -231,12 +268,12 @@ void loop() {
         tpRX6 = calculateThroughput(currentRXBytecount6, &previousRXBytecount6, currentTimestampMillis, previousTimestampMillis);
         tpTX6 = calculateThroughput(currentTXBytecount6, &previousTXBytecount6, currentTimestampMillis, previousTimestampMillis);
         unsigned long tpSumRX = tpRX4 + tpRX6;
-        if (tpRX4 != ULONG_MAX && tpRX6 != ULONG_MAX && tpSumRX > tpMaxRX) {
+        if (!tpMaxGiven && tpRX4 != ULONG_MAX && tpRX6 != ULONG_MAX && (tpSumRX > tpMaxRX4 || tpSumRX > tpMaxRX6)) {
             tpMaxRX4 = tpSumRX;
             tpMaxRX6 = tpSumRX;
         }
         unsigned long tpSumTX = tpTX4 + tpTX6;
-        if (tpTX4 != ULONG_MAX && tpTX6 != ULONG_MAX && tpSumTX > tpMaxTX) {
+        if (!tpMaxGiven && tpTX4 != ULONG_MAX && tpTX6 != ULONG_MAX && (tpSumTX > tpMaxTX4 || tpSumTX > tpMaxTX6)) {
             tpMaxTX4 = tpSumTX;
             tpMaxTX6 = tpSumTX;
         }
