@@ -80,12 +80,14 @@ unsigned long calculateThroughput(
 
     unsigned long throughput = ULONG_MAX;
     unsigned long deltaMillis = currentTimestampMillis - previousTimestampMillis;
-    Serial.print("Throughput over ");
+    Serial.print("Bytes over ");
     Serial.print(deltaMillis);
     Serial.print(" ms: ");
     if (*previousBytecount != 0) {
-        throughput = 1000 * (currentBytecount - *previousBytecount) + (deltaMillis/2) / deltaMillis;
+        throughput = (1000ULL * (currentBytecount - *previousBytecount) + (deltaMillis/2)) / deltaMillis;
     }
+    Serial.println((unsigned long)(currentBytecount - *previousBytecount));
+    Serial.print("Bytes per second: ");
     Serial.println(throughput);
 
     *previousBytecount = currentBytecount;
@@ -198,8 +200,8 @@ void loop() {
         Serial.println("OK");
         client.stop();
         tpRX4 = calculateThroughput(currentRXBytecount4, &previousRXBytecount4, currentTimestampMillis, previousTimestampMillis);
-        tpRX6 = calculateThroughput(currentRXBytecount6, &previousRXBytecount6, currentTimestampMillis, previousTimestampMillis);
         tpTX4 = calculateThroughput(currentTXBytecount4, &previousTXBytecount4, currentTimestampMillis, previousTimestampMillis);
+        tpRX6 = calculateThroughput(currentRXBytecount6, &previousRXBytecount6, currentTimestampMillis, previousTimestampMillis);
         tpTX6 = calculateThroughput(currentTXBytecount6, &previousTXBytecount6, currentTimestampMillis, previousTimestampMillis);
     } else {
         Serial.println("FAIL");
@@ -211,7 +213,6 @@ void loop() {
     previousTimestampMillis = currentTimestampMillis;
 
     /* Check internet connectivity */
-    currentTimestampMillis = millis();
     if (currentTimestampMillis >= previousConnCheckMillis + CONNECTION_TEST_INTERVAL_MS) {
         Serial.println("Checking connectivity...");
 
