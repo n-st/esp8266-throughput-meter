@@ -14,7 +14,7 @@
 
 // only show most significant digit of throughput numbers,
 // blank out the rest with _
-#define LOW_PRECISION_MODE 1
+//#define LOW_PRECISION_MODE 1
 
 #define TIMEDELTA(old__, new__) ( \
         ((new__) < (old__)) \
