@@ -27,6 +27,8 @@
 #define ARROW_FONT_HEIGHT 8
 #define ARROW_FONT_WIDTH 6
 
+#define THROUGHPUT_UNKNOWN ULONG_MAX
+
 unsigned long long previousRXBytecount4 = 0;
 unsigned long long previousRXBytecount6 = 0;
 unsigned long long previousTXBytecount4 = 0;
@@ -90,12 +92,12 @@ unsigned long calculateThroughput(
 
     if (currentBytecount == 0) {
         Serial.println("[no current byte count; skipping]");
-        return ULONG_MAX;
+        return THROUGHPUT_UNKNOWN;
 
     } else if (*previousBytecount == 0) {
         Serial.println("[no previous byte count; initialising]");
         *previousBytecount = currentBytecount;
-        return ULONG_MAX;
+        return THROUGHPUT_UNKNOWN;
 
     } else if (currentBytecount < *previousBytecount) {
         // we don't know the bit length of the counter, so we can't (easily)
@@ -104,7 +106,7 @@ unsigned long calculateThroughput(
         // should be close to the MAX value of the counter datatype)
         Serial.println("[byte count roll-over; re-initialising]");
         *previousBytecount = currentBytecount;
-        return ULONG_MAX;
+        return THROUGHPUT_UNKNOWN;
 
     } else {
         unsigned long throughput = (1000ULL * (currentBytecount - *previousBytecount) + (deltaMillis/2)) / deltaMillis;
@@ -120,7 +122,7 @@ unsigned long calculateThroughput(
 }
 
 unsigned int calculateThroughputBarWidth(unsigned long tp, unsigned long tpMax) {
-    if (tp == ULONG_MAX || tp == 0) {
+    if (tp == THROUGHPUT_UNKNOWN || tp == 0) {
         // unknown || 0
         return 0;
 
@@ -136,7 +138,7 @@ unsigned int calculateThroughputBarWidth(unsigned long tp, unsigned long tpMax) 
 }
 
 void formatThroughputStr(long throughput, char *buffer) {
-    if (throughput == ULONG_MAX) {
+    if (throughput == THROUGHPUT_UNKNOWN) {
         // unknown -> ---
         sprintf(buffer, "---");
 
@@ -283,21 +285,21 @@ void loop() {
         tpRX6 = calculateThroughput(currentRXBytecount6, &previousRXBytecount6, currentTimestampMillis, previousTimestampMillis);
         tpTX6 = calculateThroughput(currentTXBytecount6, &previousTXBytecount6, currentTimestampMillis, previousTimestampMillis);
         unsigned long tpSumRX = tpRX4 + tpRX6;
-        if (!tpMaxGiven && tpRX4 != ULONG_MAX && tpRX6 != ULONG_MAX && (tpSumRX > tpMaxRX4 || tpSumRX > tpMaxRX6)) {
+        if (!tpMaxGiven && tpRX4 != THROUGHPUT_UNKNOWN && tpRX6 != THROUGHPUT_UNKNOWN && (tpSumRX > tpMaxRX4 || tpSumRX > tpMaxRX6)) {
             tpMaxRX4 = tpSumRX;
             tpMaxRX6 = tpSumRX;
         }
         unsigned long tpSumTX = tpTX4 + tpTX6;
-        if (!tpMaxGiven && tpTX4 != ULONG_MAX && tpTX6 != ULONG_MAX && (tpSumTX > tpMaxTX4 || tpSumTX > tpMaxTX6)) {
+        if (!tpMaxGiven && tpTX4 != THROUGHPUT_UNKNOWN && tpTX6 != THROUGHPUT_UNKNOWN && (tpSumTX > tpMaxTX4 || tpSumTX > tpMaxTX6)) {
             tpMaxTX4 = tpSumTX;
             tpMaxTX6 = tpSumTX;
         }
     } else {
         Serial.println("FAIL");
-        tpRX4 = ULONG_MAX;
-        tpRX6 = ULONG_MAX;
-        tpTX4 = ULONG_MAX;
-        tpTX6 = ULONG_MAX;
+        tpRX4 = THROUGHPUT_UNKNOWN;
+        tpRX6 = THROUGHPUT_UNKNOWN;
+        tpTX4 = THROUGHPUT_UNKNOWN;
+        tpTX6 = THROUGHPUT_UNKNOWN;
     }
     previousTimestampMillis = currentTimestampMillis;
 
