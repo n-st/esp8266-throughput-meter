@@ -88,12 +88,21 @@ unsigned long calculateThroughput(
     Serial.print("Bytes over ");
     Serial.print(deltaMillis);
     Serial.print(" ms: ");
-    if (*previousBytecount != 0) {
+
+    if (currentBytecount == 0) {
+        Serial.println("[no current byte count; skipping]");
+        return ULONG_MAX;
+
+    } else if (*previousBytecount == 0) {
+        Serial.println("[no previous byte count; initialising]");
+
+    } else {
         throughput = (1000ULL * (currentBytecount - *previousBytecount) + (deltaMillis/2)) / deltaMillis;
+        Serial.println((unsigned long)(currentBytecount - *previousBytecount));
+
+        Serial.print("Bytes per second: ");
+        Serial.println(throughput);
     }
-    Serial.println((unsigned long)(currentBytecount - *previousBytecount));
-    Serial.print("Bytes per second: ");
-    Serial.println(throughput);
 
     *previousBytecount = currentBytecount;
 
