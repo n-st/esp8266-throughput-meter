@@ -97,6 +97,15 @@ unsigned long calculateThroughput(
         *previousBytecount = currentBytecount;
         return ULONG_MAX;
 
+    } else if (currentBytecount < *previousBytecount) {
+        // we don't know the bit length of the counter, so we can't (easily)
+        // calculate the bytes transferred during the overflow
+        // (we would have to guess based on the previous counter value, which
+        // should be close to the MAX value of the counter datatype)
+        Serial.println("[byte count roll-over; re-initialising]");
+        *previousBytecount = currentBytecount;
+        return ULONG_MAX;
+
     } else {
         unsigned long throughput = (1000ULL * (currentBytecount - *previousBytecount) + (deltaMillis/2)) / deltaMillis;
         Serial.println((unsigned long)(currentBytecount - *previousBytecount));
