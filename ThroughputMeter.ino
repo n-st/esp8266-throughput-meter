@@ -83,7 +83,6 @@ unsigned long calculateThroughput(
         const unsigned long currentTimestampMillis,
         const unsigned long previousTimestampMillis) {
 
-    unsigned long throughput = ULONG_MAX;
     unsigned long deltaMillis = TIMEDELTA(previousTimestampMillis, currentTimestampMillis);
     Serial.print("Bytes over ");
     Serial.print(deltaMillis);
@@ -95,18 +94,20 @@ unsigned long calculateThroughput(
 
     } else if (*previousBytecount == 0) {
         Serial.println("[no previous byte count; initialising]");
+        *previousBytecount = currentBytecount;
+        return ULONG_MAX;
 
     } else {
-        throughput = (1000ULL * (currentBytecount - *previousBytecount) + (deltaMillis/2)) / deltaMillis;
+        unsigned long throughput = (1000ULL * (currentBytecount - *previousBytecount) + (deltaMillis/2)) / deltaMillis;
         Serial.println((unsigned long)(currentBytecount - *previousBytecount));
 
         Serial.print("Bytes per second: ");
         Serial.println(throughput);
+
+        *previousBytecount = currentBytecount;
+
+        return throughput;
     }
-
-    *previousBytecount = currentBytecount;
-
-    return throughput;
 }
 
 unsigned int calculateThroughputBarWidth(unsigned long tp, unsigned long tpMax) {
